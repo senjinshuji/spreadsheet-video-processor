@@ -113,19 +113,24 @@ class GoogleDriveStorage:
     
     def __init__(self, credentials_path: Optional[str] = None):
         self.credentials_path = credentials_path or os.getenv("GOOGLE_DRIVE_CREDENTIALS")
+        self.credentials_json = os.getenv("GOOGLE_DRIVE_CREDENTIALS_JSON")
         self.folder_id = os.getenv("GOOGLE_DRIVE_FOLDER_ID")  # Target folder ID
         self.service = None
         
     def authenticate(self):
         """Authenticate with Google Drive API"""
         try:
-            if not self.credentials_path or not os.path.exists(self.credentials_path):
+            # Try JSON string from environment variable first
+            if self.credentials_json:
+                logger.info("Using Google Drive credentials from environment variable")
+                credentials_info = json.loads(self.credentials_json)
+            elif self.credentials_path and os.path.exists(self.credentials_path):
+                logger.info("Using Google Drive credentials from file")
+                with open(self.credentials_path, 'r') as f:
+                    credentials_info = json.load(f)
+            else:
                 logger.warning("Google Drive credentials not found, upload will be skipped")
                 return False
-                
-            # Load service account credentials
-            with open(self.credentials_path, 'r') as f:
-                credentials_info = json.load(f)
             
             from google.oauth2 import service_account
             credentials = service_account.Credentials.from_service_account_info(
