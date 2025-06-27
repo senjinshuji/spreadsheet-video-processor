@@ -21,6 +21,11 @@ try:
 except:
     pass
 
+# Debug Python environment
+import sys
+print(f"Python executable: {sys.executable}")
+print(f"Python path: {sys.path[:3]}...")
+
 # Conditional import of video processor
 try:
     print("Attempting to import video_processor...")
