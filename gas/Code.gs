@@ -1,7 +1,7 @@
 // Google Apps Script for Spreadsheet Video Processor
 // This script adds a custom menu to Google Sheets for processing videos
 
-const API_BASE_URL = 'https://video-processor-docker.onrender.com/api/v1'; // Render API URL
+const API_BASE_URL = 'https://spreadsheet-video-processor-docker.onrender.com/api/v1'; // Render API URL
 const STORAGE_KEY = 'VIDEO_PROCESSOR_AUTH_TOKEN';
 
 /**
