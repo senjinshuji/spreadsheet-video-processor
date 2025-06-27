@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     imagemagick \
     git \
     wget \
+    curl \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
@@ -42,5 +43,9 @@ EXPOSE 8000
 # Test MoviePy import before starting
 RUN python -c "from moviepy.editor import VideoFileClip; print('MoviePy imported successfully')" || echo "MoviePy import failed"
 
-# Default command - use PORT env variable
-CMD uvicorn main:app --host 0.0.0.0 --port $PORT
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-8000}/api/v1/health || exit 1
+
+# Default command - use PORT env variable with fallback  
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1
