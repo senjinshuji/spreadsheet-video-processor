@@ -23,22 +23,31 @@ except:
 
 # Conditional import of video processor
 try:
+    print("Attempting to import video_processor...")
     from video_processor import VideoProcessor
+    print("VideoProcessor imported successfully!")
+    
+    print("Creating VideoProcessor instance...")
     video_processor = VideoProcessor()
+    print("VideoProcessor instance created successfully!")
+    
     MOVIEPY_AVAILABLE = True
-    print("MoviePy imported successfully!")
+    print("✅ MoviePy imported successfully!")
 except ImportError as e:
-    print(f"MoviePy not available: {e}")
+    print(f"❌ MoviePy ImportError: {e}")
     import traceback
     traceback.print_exc()
     video_processor = None
     MOVIEPY_AVAILABLE = False
 except Exception as e:
-    print(f"Unexpected error importing MoviePy: {e}")
+    print(f"❌ Unexpected error importing MoviePy: {e}")
+    print(f"Error type: {type(e)}")
     import traceback
     traceback.print_exc()
     video_processor = None
     MOVIEPY_AVAILABLE = False
+
+print(f"MOVIEPY_AVAILABLE: {MOVIEPY_AVAILABLE}")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -234,10 +243,14 @@ def process_video_job_mock(job_id: str, media_items: List[dict], output_settings
         # Simulate processing
         time.sleep(2)
         
+        # Create a test Google Drive URL (temporary for testing)
+        test_drive_url = "https://drive.google.com/file/d/1test_file_id/view?usp=drive_link"
+        
         # Update job completion
         jobs_db[job_id]["status"] = "completed"
         jobs_db[job_id]["progress"] = 100
         jobs_db[job_id]["output_url"] = f"/api/v1/jobs/{job_id}/download"
+        jobs_db[job_id]["gdrive_url"] = test_drive_url  # Test Google Drive URL
         jobs_db[job_id]["message"] = "Processing completed (mock mode - MoviePy not available)"
         jobs_db[job_id]["completed_at"] = datetime.utcnow().isoformat()
         
