@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  <style>
+    body {
+      padding: 20px;
+    }
+    .section {
+      margin-bottom: 30px;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 5px;
+    }
+    .section h3 {
+      margin-top: 0;
+      color: #1a73e8;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="password"],
+    select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .help-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+    .button-group {
+      margin-top: 20px;
+      text-align: right;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      display: none;
+    }
+    .status.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .status.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+  <div class="section">
+    <h3>API Configuration</h3>
+    <div class="form-group">
+      <label for="apiUrl">API URL</label>
+      <input type="text" id="apiUrl" placeholder="https://your-api-domain.com/api/v1">
+      <div class="help-text">The base URL of your video processor API</div>
+    </div>
+    <div class="form-group">
+      <label for="authToken">Authentication Token (Optional)</label>
+      <input type="password" id="authToken" placeholder="Bearer token">
+      <div class="help-text">Leave empty for anonymous access</div>
+    </div>
+    <button class="action" onclick="testConnection()">Test Connection</button>
+  </div>
+
+  <div class="section">
+    <h3>Column Mappings (New Format)</h3>
+    <div class="form-group">
+      <label for="targetColumn">実行対象 Column</label>
+      <input type="number" id="targetColumn" min="1" value="1">
+      <div class="help-text">Column containing execution target marker (○)</div>
+    </div>
+    <div class="form-group">
+      <label for="resultColumn">実行結果 Column</label>
+      <input type="number" id="resultColumn" min="1" value="2">
+      <div class="help-text">Column to display processing status and final video URL</div>
+    </div>
+    <div class="form-group">
+      <label for="firstMaterialColumn">素材① Column</label>
+      <input type="number" id="firstMaterialColumn" min="1" value="3">
+      <div class="help-text">First material column (素材①). System will automatically detect subsequent materials.</div>
+    </div>
+    <div class="help-text">
+      <strong>Note:</strong> Materials should be in groups of 3 columns: [URL, Start Time, Duration]<br>
+      Example: 素材① (Col 3), 使用開始 (Col 4), 使用秒数 (Col 5), 素材② (Col 6), etc.
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Output Settings</h3>
+    <div class="form-group">
+      <label for="outputFormat">Output Format</label>
+      <select id="outputFormat">
+        <option value="mp4">MP4</option>
+        <option value="avi">AVI</option>
+        <option value="mov">MOV</option>
+        <option value="webm">WebM</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="outputFps">Frame Rate (FPS)</label>
+      <input type="number" id="outputFps" min="1" max="120" value="30">
+    </div>
+    <div class="form-group">
+      <label for="outputResolution">Resolution (Optional)</label>
+      <input type="text" id="outputResolution" placeholder="1920x1080">
+      <div class="help-text">Leave empty to use original resolution</div>
+    </div>
+    <div class="form-group">
+      <label for="outputCodec">Video Codec</label>
+      <select id="outputCodec">
+        <option value="libx264">H.264 (libx264)</option>
+        <option value="libx265">H.265 (libx265)</option>
+        <option value="libvpx">VP8 (libvpx)</option>
+        <option value="libvpx-vp9">VP9 (libvpx-vp9)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="outputAudioCodec">Audio Codec</label>
+      <select id="outputAudioCodec">
+        <option value="aac">AAC</option>
+        <option value="mp3">MP3</option>
+        <option value="opus">Opus</option>
+        <option value="copy">Copy Original</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="outputQuality">Quality</label>
+      <select id="outputQuality">
+        <option value="low">Low (Fast, smaller file)</option>
+        <option value="medium">Medium (Balanced)</option>
+        <option value="high">High (Slow, better quality)</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="status" class="status"></div>
+
+  <div class="button-group">
+    <button onclick="google.script.host.close()">Cancel</button>
+    <button class="action" onclick="saveSettings()">Save Settings</button>
+  </div>
+
+  <script>
+    // Load current settings
+    window.onload = function() {
+      google.script.run.withSuccessHandler(loadSettings).getSettings();
+    };
+
+    function loadSettings(settings) {
+      document.getElementById('apiUrl').value = settings.apiUrl || '';
+      document.getElementById('authToken').value = settings.authToken || '';
+      document.getElementById('targetColumn').value = settings.targetColumn || 1;
+      document.getElementById('resultColumn').value = settings.resultColumn || 2;
+      document.getElementById('firstMaterialColumn').value = settings.firstMaterialColumn || 3;
+      document.getElementById('outputFormat').value = settings.outputFormat || 'mp4';
+      document.getElementById('outputFps').value = settings.outputFps || 30;
+      document.getElementById('outputResolution').value = settings.outputResolution || '';
+      document.getElementById('outputCodec').value = settings.outputCodec || 'libx264';
+      document.getElementById('outputAudioCodec').value = settings.outputAudioCodec || 'aac';
+      document.getElementById('outputQuality').value = settings.outputQuality || 'high';
+    }
+
+    function saveSettings() {
+      const settings = {
+        apiUrl: document.getElementById('apiUrl').value,
+        authToken: document.getElementById('authToken').value,
+        targetColumn: parseInt(document.getElementById('targetColumn').value),
+        resultColumn: parseInt(document.getElementById('resultColumn').value),
+        firstMaterialColumn: parseInt(document.getElementById('firstMaterialColumn').value),
+        outputFormat: document.getElementById('outputFormat').value,
+        outputFps: parseInt(document.getElementById('outputFps').value),
+        outputResolution: document.getElementById('outputResolution').value,
+        outputCodec: document.getElementById('outputCodec').value,
+        outputAudioCodec: document.getElementById('outputAudioCodec').value,
+        outputQuality: document.getElementById('outputQuality').value
+      };
+
+      google.script.run
+        .withSuccessHandler(onSaveSuccess)
+        .withFailureHandler(onSaveError)
+        .saveSettings(settings);
+    }
+
+    function testConnection() {
+      showStatus('Testing connection...', 'info');
+      google.script.run
+        .withSuccessHandler(onTestSuccess)
+        .withFailureHandler(onTestError)
+        .testApiConnection();
+    }
+
+    function onSaveSuccess(result) {
+      if (result.success) {
+        showStatus(result.message, 'success');
+        setTimeout(() => google.script.host.close(), 2000);
+      } else {
+        showStatus(result.message, 'error');
+      }
+    }
+
+    function onSaveError(error) {
+      showStatus('Error saving settings: ' + error.message, 'error');
+    }
+
+    function onTestSuccess(result) {
+      if (result.success) {
+        showStatus(result.message, 'success');
+      } else {
+        showStatus(result.message, 'error');
+      }
+    }
+
+    function onTestError(error) {
+      showStatus('Test failed: ' + error.message, 'error');
+    }
+
+    function showStatus(message, type) {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = message;
+      statusEl.className = 'status ' + type;
+      statusEl.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

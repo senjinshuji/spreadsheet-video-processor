@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  <style>
+    body {
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h3 {
+      color: #1a73e8;
+      margin-top: 25px;
+    }
+    h4 {
+      color: #5f6368;
+      margin-top: 20px;
+    }
+    code {
+      background-color: #f5f5f5;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+    .example {
+      background-color: #f8f9fa;
+      border: 1px solid #dadce0;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 10px 0;
+    }
+    .example h5 {
+      margin-top: 0;
+      color: #1a73e8;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 10px 0;
+    }
+    th, td {
+      border: 1px solid #dadce0;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f8f9fa;
+    }
+    ul {
+      margin: 10px 0;
+      padding-left: 25px;
+    }
+    .button-group {
+      margin-top: 30px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Video Processor Help</h2>
+
+  <h3>Quick Start</h3>
+  <ol>
+    <li>Set up your spreadsheet with media URLs and durations</li>
+    <li>Configure settings (Video Processor → Settings)</li>
+    <li>Select rows to process</li>
+    <li>Click Video Processor → Process Selected Rows</li>
+    <li>Wait for processing to complete</li>
+    <li>Download your processed videos from the download links</li>
+  </ol>
+
+  <h3>New Spreadsheet Format</h3>
+  <p>The new format uses a flexible material-based structure:</p>
+  
+  <table>
+    <tr>
+      <th>Column</th>
+      <th>Required</th>
+      <th>Description</th>
+      <th>Example</th>
+    </tr>
+    <tr>
+      <td>実行対象</td>
+      <td>Yes</td>
+      <td>Execution target marker</td>
+      <td>○</td>
+    </tr>
+    <tr>
+      <td>実行結果</td>
+      <td>Auto</td>
+      <td>Processing status and final video URL</td>
+      <td>https://api.../download</td>
+    </tr>
+    <tr>
+      <td>素材① (URL)</td>
+      <td>Yes</td>
+      <td>First material URL</td>
+      <td>video1.mp4</td>
+    </tr>
+    <tr>
+      <td>使用開始</td>
+      <td>Yes</td>
+      <td>Start time for material</td>
+      <td>0:05 or 5</td>
+    </tr>
+    <tr>
+      <td>使用秒数</td>
+      <td>Yes</td>
+      <td>Duration to use</td>
+      <td>0:10 or 10</td>
+    </tr>
+    <tr>
+      <td>素材②...</td>
+      <td>No</td>
+      <td>Additional materials (repeating pattern)</td>
+      <td>image1.jpg, 0:00, 0:03</td>
+    </tr>
+  </table>
+
+  <h3>Features</h3>
+  <h4>Multiple Media Files</h4>
+  <p>You can process multiple media files in a single row by separating URLs and durations with commas:</p>
+  <div class="example">
+    <h5>Example:</h5>
+    <code>URLs: video1.mp4,image1.jpg,video2.mp4</code><br>
+    <code>Durations: 5,3,10</code>
+  </div>
+
+  <h4>Range Selection</h4>
+  <p>Select multiple rows to process them as separate videos:</p>
+  <ul>
+    <li>Click and drag to select multiple rows</li>
+    <li>Use Ctrl+Click (Cmd+Click on Mac) to select non-consecutive rows</li>
+    <li>Each row will be processed as a separate video</li>
+  </ul>
+
+  <h4>Supported Formats</h4>
+  <p><strong>Video:</strong> MP4, AVI, MOV, MKV, FLV, WMV, WebM</p>
+  <p><strong>Image:</strong> JPG/JPEG, PNG, GIF, BMP, TIFF</p>
+
+  <h3>Settings</h3>
+  <h4>Column Mappings</h4>
+  <p>Configure which columns contain your data. Use column numbers (A=1, B=2, etc.)</p>
+
+  <h4>Output Settings</h4>
+  <ul>
+    <li><strong>Format:</strong> Output video format (MP4 recommended)</li>
+    <li><strong>FPS:</strong> Frames per second (30 is standard)</li>
+    <li><strong>Resolution:</strong> Output resolution (e.g., 1920x1080)</li>
+    <li><strong>Quality:</strong> Balance between file size and quality</li>
+  </ul>
+
+  <h3>Tips</h3>
+  <ul>
+    <li>Use consistent video resolutions for best results</li>
+    <li>Images will be displayed for the specified duration</li>
+    <li>Processing time depends on video length and quality settings</li>
+    <li>You can close the processing dialog - work continues in background</li>
+    <li>Check the status column for real-time updates</li>
+  </ul>
+
+  <h3>Troubleshooting</h3>
+  <h4>Common Issues</h4>
+  <ul>
+    <li><strong>API Connection Failed:</strong> Check your API URL in Settings</li>
+    <li><strong>Processing Failed:</strong> Verify media URLs are accessible</li>
+    <li><strong>No Download Link:</strong> Processing may still be in progress</li>
+  </ul>
+
+  <div class="button-group">
+    <button onclick="createSample()">Create Sample Data</button>
+    <button onclick="google.script.host.close()">Close</button>
+  </div>
+
+  <script>
+    function createSample() {
+      google.script.run.createSampleData();
+      google.script.host.close();
+    }
+  </script>
+</body>
+</html>

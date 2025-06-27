@@ -1,0 +1,58 @@
+services:
+  # Web API
+  - type: web
+    name: video-processor-api
+    env: python
+    buildCommand: |
+      cd backend
+      pip install -r requirements.txt
+    startCommand: |
+      cd backend
+      uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: STORAGE_BACKEND
+        value: local
+      - key: STORAGE_PATH
+        value: /opt/render/project/storage
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: video-processor-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: video-processor-redis
+          property: connectionString
+
+  # Background Worker
+  - type: worker
+    name: video-processor-worker
+    env: python
+    buildCommand: |
+      cd backend
+      apt-get update && apt-get install -y ffmpeg
+      pip install -r requirements.txt
+    startCommand: |
+      cd backend
+      celery -A celery_app worker --loglevel=info
+    envVars:
+      - key: STORAGE_BACKEND
+        value: local
+      - key: STORAGE_PATH
+        value: /opt/render/project/storage
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: video-processor-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: video-processor-redis
+          property: connectionString
+
+  # Redis
+  - type: redis
+    name: video-processor-redis
+    plan: starter
