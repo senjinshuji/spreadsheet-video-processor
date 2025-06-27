@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender-dev \
     libgomp1 \
+    libfontconfig1 \
     libgstreamer1.0-0 \
     gstreamer1.0-plugins-base \
     gstreamer1.0-plugins-good \
@@ -20,6 +21,9 @@ RUN apt-get update && apt-get install -y \
     gstreamer1.0-libav \
     gstreamer1.0-tools \
     && rm -rf /var/lib/apt/lists/*
+
+# Set environment variables for MoviePy
+ENV IMAGEIO_FFMPEG_EXE=/usr/bin/ffmpeg
 
 # Set working directory
 WORKDIR /app
