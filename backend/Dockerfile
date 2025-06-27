@@ -44,8 +44,12 @@ ENV STORAGE_PATH=/app/storage
 # Expose port
 EXPOSE 8000
 
-# Test MoviePy import before starting
-RUN python -c "from moviepy.editor import VideoFileClip; print('MoviePy imported successfully')" || echo "MoviePy import failed"
+# Test imports before starting
+RUN python test_moviepy_import.py || echo "MoviePy test failed"
+
+# Use simple processor if MoviePy fails
+RUN echo "Testing simple video processor..." && \
+    python -c "from simple_video_processor import SimpleVideoProcessor; print('Simple processor available')" || echo "Simple processor failed"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
